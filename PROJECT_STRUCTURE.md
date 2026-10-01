@@ -10,7 +10,7 @@ This project will implement a terminal-based lossless compression system using:
 - Bit-Level Encoding
 - CRC32 Integrity Checking
 
-The project will be developed in C.
+The project will be developed in C with a terminal-based interface.
 
 Main directories:
 
