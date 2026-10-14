@@ -47,15 +47,13 @@ int read_file(const char *filename, FileBuffer *buffer){
 int write_file(const char *filename, const unsigned char *data, size_t size){
     FILE *file = fopen(filename, "wb");
 
-    if (file == NULL)
-    {
+    if (file == NULL){
         return -1;
     }
 
     size_t bytes_written = fwrite(data, 1, size, file);
 
-    if (bytes_written != size)
-    {
+    if (bytes_written != size){
         fclose(file);
         return -1;
     }
