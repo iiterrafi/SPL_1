@@ -62,4 +62,15 @@ int write_file(const char *filename, const unsigned char *data, size_t size){
 
     return 0;
 }
- 
+
+void free_file_buffer(FileBuffer *buffer){
+    if (buffer == NULL)
+    {
+        return;
+    }
+
+    free(buffer->data);
+
+    buffer->data = NULL;
+    buffer->size = 0;
+}
