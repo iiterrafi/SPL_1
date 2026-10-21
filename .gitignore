@@ -1,0 +1,10 @@
+# Compiled test executables
+/test_file_io
+/test_read_existing_file
+
+# C object files
+*.o
+
+# Generated test output
+/test_data/empty_test.txt
+/test_data/file_io_test.bin
