@@ -43,6 +43,34 @@ return passed;
 int main(){
 int passed = 1;
 
+    /* Test 0: Reject invalid arguments */
+    uint8_t *invalid_output = NULL;
+    size_t invalid_output_size = 0;
+
+    if (rle_compress(NULL, 5, &invalid_output,
+                     &invalid_output_size) != -1) {
+        printf("FAIL: Compression accepted a NULL input.\n");
+        passed = 0;
+    } else {
+        printf("PASS: Compression rejects a NULL input.\n");
+    }
+
+    if (rle_compress(NULL, 0, NULL,
+                     &invalid_output_size) != -1) {
+        printf("FAIL: Compression accepted a NULL output pointer.\n");
+        passed = 0;
+    } else {
+        printf("PASS: Compression rejects a NULL output pointer.\n");
+    }
+
+    if (rle_decompress(NULL, 5, &invalid_output,
+                       &invalid_output_size) != -1) {
+        printf("FAIL: Decompression accepted a NULL input.\n");
+        passed = 0;
+    } else {
+        printf("PASS: Decompression rejects a NULL input.\n");
+    }
+
 /* Test 1: Repeated bytes */
 const uint8_t repeated[] = {'A', 'A', 'A', 'A', 'A','B', 'B', 'B', 'C', 'C', 'C', 'C'};
 
