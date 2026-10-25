@@ -3,8 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-int main(void)
-{
+int main(){
     FILE *file = tmpfile();
 
     if (file == NULL) {
@@ -76,6 +75,51 @@ int main(void)
     }
 
     printf("Step 3 passed: Bits read back correctly.\n");
+
+        /* Test writing and reading a complete byte */
+    FILE *byte_file = tmpfile();
+
+    if (byte_file == NULL) {
+        printf("FAIL: Could not create byte test file.\n");
+        fclose(file);
+        return 1;
+    }
+
+    BitWriter byte_writer;
+
+    if (bit_writer_init(&byte_writer, byte_file) != 0 || bit_write_bits(&byte_writer, 165, 8) != 0) {
+        printf("FAIL: Writing a complete byte.\n");
+        fclose(byte_file);
+        fclose(file);
+        return 1;
+    }
+
+    rewind(byte_file);
+
+    int byte_value = fgetc(byte_file);
+
+    if (byte_value != 165) {
+        printf("FAIL: Expected 165, got %d.\n", byte_value);
+        fclose(byte_file);
+        fclose(file);
+        return 1;
+    }
+
+    rewind(byte_file);
+
+    BitReader byte_reader;
+    uint32_t byte_result = 0;
+
+    if (bit_reader_init(&byte_reader, byte_file) != 0 || bit_read_bits(&byte_reader, 8, &byte_result) != 0 ||byte_result != 165) {
+        printf("FAIL: Reading a complete byte.\n");
+        fclose(byte_file);
+        fclose(file);
+        return 1;
+    }
+
+    fclose(byte_file);
+
+    printf("Step 4 passed: Complete byte written and read correctly.\n");
 
     fclose(file);
 
