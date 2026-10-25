@@ -40,6 +40,39 @@ return passed;
 
 }
 
+/* Test RLE with a generated input of a specified size */
+static int test_generated_input(
+const char *test_name,
+size_t input_size,
+uint8_t value,
+int use_repeated_bytes
+) {
+uint8_t *input = NULL;
+
+if (input_size > 0) {
+    input = malloc(input_size);
+
+    if (input == NULL) {
+        printf("FAIL: %s - memory allocation failed.\n", test_name);
+        return 0;
+    }
+
+    for (size_t i = 0; i < input_size; i++) {
+        input[i] = use_repeated_bytes
+            ? value
+            : (uint8_t)(i % 251);
+    }
+}
+
+int passed = test_round_trip(test_name, input, input_size);
+
+free(input);
+
+return passed;
+
+}
+
+
 int main(){
 int passed = 1;
 
@@ -127,6 +160,18 @@ if (rle_decompress(
 } else {
     printf("PASS: Incomplete run packet rejected.\n");
 }
+
+/* Test 8: Boundary cases for repeated runs */
+passed &= test_generated_input("Run of 2 bytes", 2, 'A', 1);
+passed &= test_generated_input("Run of 3 bytes", 3, 'A', 1);
+passed &= test_generated_input("Run of 128 bytes", 128, 'A', 1);
+passed &= test_generated_input("Run of 129 bytes", 129, 'A', 1);
+passed &= test_generated_input("Run of 130 bytes", 130, 'A', 1);
+passed &= test_generated_input("Run of 131 bytes", 131, 'A', 1);
+
+/* Test 9: Boundary cases for literal packets */
+passed &= test_generated_input("Literal data of 128 bytes", 128, 'A', 0);
+passed &= test_generated_input("Literal data of 129 bytes", 129, 'A', 0);
 
 
 if (!passed) {
