@@ -10,3 +10,4 @@
 # Generated test output
 /test_data/empty_test.txt
 /test_data/file_io_test.bin
+/test_lz77
