@@ -12,12 +12,7 @@
 /*
  * Create a new Huffman tree node.
  */
-static HuffmanNode *huffman_create_node(
-    uint64_t frequency,
-    int symbol,
-    HuffmanNode *left,
-    HuffmanNode *right
-) {
+static HuffmanNode *huffman_create_node(uint64_t frequency, int symbol, HuffmanNode *left, HuffmanNode *right) {
     HuffmanNode *node = malloc(sizeof(HuffmanNode));
 
     if (node == NULL) {
@@ -565,4 +560,58 @@ void huffman_heap_destroy(HuffmanMinHeap *heap) {
 
     free(heap->nodes);
     free(heap);
+}
+
+int huffman_decode_symbol(
+    BitReader *reader,
+    const HuffmanCode codes[HUFFMAN_SYMBOL_COUNT],
+    uint8_t *symbol
+) {
+    if (reader == NULL || codes == NULL || symbol == NULL) {
+        return -1;
+    }
+
+    uint8_t current_bits[32] = {0};
+
+    for (unsigned int length = 1; length <= 255; length++) {
+
+        unsigned int bit;
+
+        if (bit_read_bit(reader, &bit) != 0) {
+            return -1;
+        }
+
+        /* Append the new bit to the current code. */
+        for (int i = 0; i < 31; i++) {
+            current_bits[i] = (uint8_t)((current_bits[i] << 1) | (current_bits[i + 1] >> 7));
+        }
+
+        current_bits[31] <<= 1;
+
+        current_bits[31] |= (uint8_t)bit;
+
+        /* Search for a matching canonical code. */
+        for (int i = 0; i < HUFFMAN_SYMBOL_COUNT; i++) {
+
+            if (codes[i].length != length) {
+                continue;
+            }
+
+            int match = 1;
+
+            for (int j = 0; j < 32; j++) {
+                if (current_bits[j] != codes[i].bits[j]) {
+                    match = 0;
+                    break;
+                }
+            }
+
+            if (match) {
+                *symbol = (uint8_t)i;
+                return 0;
+            }
+        }
+    }
+
+    return -1;
 }

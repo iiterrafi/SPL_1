@@ -16,3 +16,13 @@
 /test_data/empty_test.txt
 /test_data/file_io_test.bin
 /test_lz77
+# Additional Huffman test executables
+/test_huffman_all_bytes
+/test_huffman_binary
+/test_huffman_bitstream
+/test_huffman_decode
+/test_huffman_empty
+/test_huffman_pipeline
+/test_huffman_single_symbol
+/test_huffman_two_symbols
+/test_huffman_uneven

@@ -1,9 +1,9 @@
 #ifndef HUFFMAN_H
 #define HUFFMAN_H
 
-
 #include <stddef.h>
 #include <stdint.h>
+#include "bitstream.h"
 
 /* Number of possible byte values: 0 through 255 */
 #define HUFFMAN_SYMBOL_COUNT 256
@@ -69,5 +69,12 @@ int huffman_generate_canonical_codes(const uint16_t code_lengths[HUFFMAN_SYMBOL_
 
 /* Count the frequency of each byte */
 int huffman_count_frequencies(const uint8_t *input, size_t input_size, uint64_t frequencies[HUFFMAN_SYMBOL_COUNT]);
+
+/*
+ * Decode one symbol using canonical Huffman codes.
+ *
+ * Returns 0 on success, -1 on failure.
+ */
+int huffman_decode_symbol(BitReader *reader, const HuffmanCode codes[HUFFMAN_SYMBOL_COUNT], uint8_t *symbol);
 
 #endif
