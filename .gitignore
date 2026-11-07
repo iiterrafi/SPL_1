@@ -26,3 +26,4 @@
 /test_huffman_single_symbol
 /test_huffman_two_symbols
 /test_huffman_uneven
+/test_crc32
