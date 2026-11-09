@@ -27,3 +27,8 @@
 /test_huffman_two_symbols
 /test_huffman_uneven
 /test_crc32
+
+# Token codec and integration test executables
+/test_token_codec
+/test_rle_lz77
+/test_full_pipeline
