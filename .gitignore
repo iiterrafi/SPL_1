@@ -32,3 +32,15 @@
 /test_token_codec
 /test_rle_lz77
 /test_full_pipeline
+
+# Archive and production compression test executables
+/test_archive
+/test_compressor
+/test_file_compression
+
+# Generated archive files
+*.cmp
+
+# Generated file compression test data
+/test_data/original.txt
+/test_data/restored.txt
