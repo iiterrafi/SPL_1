@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <limits.h>
 
 #include "file_compression.h"
@@ -13,8 +14,8 @@
 int compress_file_to_archive(
     const char *input_path,
     const char *archive_path,
-    size_t max_chain_length)
-{
+    size_t max_chain_length){
+
     if (!input_path || !archive_path || max_chain_length == 0)
         return -1;
 
@@ -186,6 +187,124 @@ failure:
     archive_free_entries(entries, entry_count);
 
     fprintf(stderr, "File decompression failed.\n");
+
+    return -1;
+}
+/* Compress multiple files into one archive. */
+int compress_files_to_archive(
+    const char *const input_paths[],
+    size_t file_count,
+    const char *archive_path,
+    size_t max_chain_length){
+
+    if (!input_paths || file_count == 0 ||
+        !archive_path || max_chain_length == 0 ||
+        file_count > UINT32_MAX)
+        return -1;
+
+    ArchiveEntry *entries = calloc(file_count, sizeof(ArchiveEntry));
+    FileBuffer *originals = calloc(file_count, sizeof(FileBuffer));
+    uint8_t **compressed_buffers = calloc(
+        file_count, sizeof(uint8_t *));
+
+    if (!entries || !originals || !compressed_buffers)
+        goto failure;
+
+    for (size_t i = 0; i < file_count; i++)
+    {
+        if (!input_paths[i] || input_paths[i][0] == '\0')
+            goto failure;
+
+        /* Prevent accidentally overwriting an input file. */
+        if (strcmp(input_paths[i], archive_path) == 0)
+            goto failure;
+
+        if (read_file(input_paths[i], &originals[i]) != 0)
+            goto failure;
+
+        size_t compressed_size = 0;
+        CompressorMetadata metadata = {0};
+
+        if (compressor_compress(
+                originals[i].data,
+                originals[i].size,
+                &compressed_buffers[i],
+                &compressed_size,
+                &metadata,
+                max_chain_length) != 0)
+            goto failure;
+
+        uint32_t checksum;
+
+        if (crc32_calculate(
+                originals[i].data,
+                originals[i].size,
+                &checksum) != 0)
+            goto failure;
+
+        entries[i].path = (char *)input_paths[i];
+        entries[i].type = ARCHIVE_ENTRY_FILE;
+        entries[i].original_size = originals[i].size;
+        entries[i].crc32 = checksum;
+
+        if (compressed_size < originals[i].size)
+        {
+            entries[i].method = ARCHIVE_METHOD_HYBRID;
+            entries[i].payload = compressed_buffers[i];
+            entries[i].payload_size = compressed_size;
+            entries[i].metadata = metadata;
+        }
+        else
+        {
+            entries[i].method = ARCHIVE_METHOD_RAW;
+            entries[i].payload = originals[i].data;
+            entries[i].payload_size = originals[i].size;
+        }
+    }
+
+    if (archive_write(archive_path, entries, file_count) != 0)
+        goto failure;
+
+    printf("Multi-file archive created successfully.\n");
+    printf("Number of files: %zu\n", file_count);
+
+    for (size_t i = 0; i < file_count; i++)
+    {
+        printf("%s: %zu bytes -> %zu bytes (%s)\n",
+               entries[i].path,
+               (size_t)entries[i].original_size,
+               entries[i].payload_size,
+               entries[i].method == ARCHIVE_METHOD_HYBRID
+                   ? "HYBRID" : "RAW");
+    }
+
+    for (size_t i = 0; i < file_count; i++)
+    {
+        free(compressed_buffers[i]);
+        free_file_buffer(&originals[i]);
+    }
+
+    free(compressed_buffers);
+    free(originals);
+    free(entries);
+
+    return 0;
+
+failure:
+    if (compressed_buffers && originals)
+    {
+        for (size_t i = 0; i < file_count; i++)
+        {
+            free(compressed_buffers[i]);
+            free_file_buffer(&originals[i]);
+        }
+    }
+
+    free(compressed_buffers);
+    free(originals);
+    free(entries);
+
+    fprintf(stderr, "Multi-file compression failed.\n");
 
     return -1;
 }

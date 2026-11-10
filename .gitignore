@@ -44,3 +44,11 @@
 # Generated file compression test data
 /test_data/original.txt
 /test_data/restored.txt
+
+# Additional integration and stress test executables
+/test_file_extensions
+/test_stress
+/test_corrupt_archive
+
+# Generated test files and archives
+/test_data/

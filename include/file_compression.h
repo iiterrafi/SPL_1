@@ -10,6 +10,14 @@ int compress_file_to_archive(
     size_t max_chain_length
 );
 
+/* Compress multiple files into one .cmp archive. */
+int compress_files_to_archive(
+    const char *const input_paths[],
+    size_t file_count,
+    const char *archive_path,
+    size_t max_chain_length
+);
+
 /* Restore one file from a .cmp archive. */
 int decompress_archive_to_file(
     const char *archive_path,

@@ -271,12 +271,10 @@ int compressor_decompress(
     if (expected_compressed_size != compressed_size)
         return -1;
 
-    if (metadata->serialized_size >
-        SIZE_MAX / LZ77_TOKEN_SERIALIZED_SIZE)
+    if (metadata->token_count > SIZE_MAX / LZ77_TOKEN_SERIALIZED_SIZE)
         return -1;
 
-    if (metadata->serialized_size !=
-        metadata->token_count * LZ77_TOKEN_SERIALIZED_SIZE)
+    if (metadata->serialized_size != metadata->token_count * LZ77_TOKEN_SERIALIZED_SIZE)
         return -1;
 
     uint8_t *decoded_serialized = NULL;
