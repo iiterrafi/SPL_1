@@ -18,10 +18,23 @@ int compress_files_to_archive(
     size_t max_chain_length
 );
 
+/* Compress an entire directory, including subdirectories. */
+int compress_directory_to_archive(
+    const char *input_directory,
+    const char *archive_path,
+    size_t max_chain_length
+);
+
 /* Restore one file from a .cmp archive. */
 int decompress_archive_to_file(
     const char *archive_path,
     const char *output_path
+);
+
+/* Restore all files and directories from a .cmp archive. */
+int decompress_archive_to_directory(
+    const char *archive_path,
+    const char *output_directory
 );
 
 #endif
